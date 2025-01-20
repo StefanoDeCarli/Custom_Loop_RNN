@@ -1,20 +1,20 @@
 # Custom-Loop-RNN
-Small Toolbox to aid the training of ISS-promoted RNN architectures (LSTM and GRU)
+Small Toolbox to for RNN custom loop in matlab (LSTM and GRU)
 
 ## Folder Structure
 
 The toolbox consists of the following main components:
 
-1. `ISS_train.m`: The primary function for training the ISS-promoted RNN.
+1. `RNN_train.m`: The primary function for training the ISS-promoted RNN.
 2. `utilities`: A folder containing utility functions required for the training process.
 3. `monitor_data_viewer.m`: A script for visualizing the training progress and ISS metrics.
 4. `trainer.m`: A script to test the functionality of the training process using a provided dataset.
 5. `data`: Contains the dataset for testing and validation purposes.
 6. `README.md`: This file provides an overview and instructions for using the toolbox.
 
-## ISS_train.m
+## RNN_train.m
 
-This function trains an ISS-promoted network, either LSTM or GRU, and returns the trained network, training information, monitor data, and the network name. The network is trained to achieve the minimum validation RMSE while promoting ISS.
+This function trains an a RNN network, either LSTM or GRU, and returns the trained network, training information, monitor data, and the network name. The network is trained to achieve the minimum validation RMSE, which is returned.
 
 ### Function Signature
 
