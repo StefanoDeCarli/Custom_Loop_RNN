@@ -11,6 +11,7 @@ function [net,info,monitor,net_name] = RNN_train(train_dataset, valid_dataset, t
 %   - is_lstm       [logical]       Select LSTM (true) or GRU (false) architecture
 %   - hidden_units  [N x 1 double]  Number of hidden unit, implicit number of layers N
 %   - learn_rate    [double]        Learn rate, static
+%   - lasso_lambda  [double]        Weight for the Lasso regularization
 %   - max_epochs    [double]        Maximum number of epochs to train with
 %   - mini_batch    [double]        Number of trials used in training for each iteration
 %   - dropout_rate  [double]        Dropout rate, part of the network to be dropped at each iteration
@@ -34,10 +35,11 @@ function [net,info,monitor,net_name] = RNN_train(train_dataset, valid_dataset, t
 
 is_lstm = train_options.is_lstm;
 hidden_units = train_options.hidden_units;
-dropout_rate = train_options.dropout_rate;
 learn_rate = train_options.learn_rate;
+lasso_lambda = train_options.lasso_lambda;
 max_epochs = train_options.max_epochs;
 mini_batch = train_options.mini_batch;
+dropout_rate = train_options.dropout_rate;
 is_visible = train_options.is_visible;
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -158,7 +160,7 @@ while epoch < max_epochs && ~monitor.Stop
         net = resetState(net);
 
         % Evaluate loss function
-        [loss, gradients, ~] = dlfeval(custom_loss, net, x_train_batch{batch}, y_train_batch{batch});
+        [loss, gradients, ~] = dlfeval(custom_loss, net, x_train_batch{batch}, y_train_batch{batch}, lasso_lambda);
         
         % Update network parameters based on loss
         [net, average_grad, average_sqgrad] = adamupdate(net, gradients, average_grad, average_sqgrad, iteration, learn_rate);
