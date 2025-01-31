@@ -35,6 +35,7 @@ train_options.learn_rate = 2e-2;
 train_options.max_epochs = 1000;
 train_options.mini_batch = numel(train_dataset.x);    % Take all the trials, to change in case
 train_options.is_visible = 'on';                      % on / off, show the training monitor or not
+train_options.is_verbose = 1;                         % 1 / 0, show the loss updates in command window
 
 %% Train the network
 [net,info,monitor,net_name] = RNN_train(train_dataset, valid_dataset, train_options);   % Training;
@@ -48,4 +49,3 @@ net_data = struct(...
     'stats', data.stats);
 
 save(['net_results/', net_name], 'net_data');
-clc;

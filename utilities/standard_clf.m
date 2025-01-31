@@ -1,5 +1,5 @@
 % Custom loss function for RNN networks
-function [loss, gradients, state] = standard_clf(net, x, targets, lambda)
+function [loss, gradients, state] = standard_clf(net, x, targets, lambda, is_verbose)
 
 % Forward pass through the network
 [Y, state] = forward(net, x);
@@ -19,5 +19,7 @@ loss = mse_loss + lasso_loss;
 gradients = dlgradient(loss, net.Learnables);
 
 % Print the loss
-fprintf('RMSE = %.4f; Lasso = %.4e;\n', mse_loss^0.5, lasso_loss);
+if is_verbose
+    fprintf('RMSE = %.4f; Lasso = %.4e;\n', mse_loss^0.5, lasso_loss);
+end
 end
