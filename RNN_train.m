@@ -12,6 +12,8 @@ function [net,info,monitor,net_name] = RNN_train(train_dataset, valid_dataset, t
 %   - hidden_units  [N x 1 double]  Number of hidden unit, implicit number of layers N
 %   - learn_rate    [double]        Learn rate, static
 %   - lasso_lambda  [double]        Weight for the Lasso regularization
+%   - pruning_th    [double]        Threshold to prune the weights below
+%   - epochs_pruned [double]        Interval between prunings
 %   - max_epochs    [double]        Maximum number of epochs to train with
 %   - mini_batch    [double]        Number of trials used in training for each iteration
 %   - dropout_rate  [double]        Dropout rate, part of the network to be dropped at each iteration
@@ -37,6 +39,8 @@ is_lstm = train_options.is_lstm;
 hidden_units = train_options.hidden_units;
 learn_rate = train_options.learn_rate;
 lasso_lambda = train_options.lasso_lambda;
+pruning_th = train_options.pruning_th;
+epochs_pruned = train_options.epochs_pruned;
 max_epochs = train_options.max_epochs;
 mini_batch = train_options.mini_batch;
 dropout_rate = train_options.dropout_rate;
@@ -148,6 +152,15 @@ monitor_data_index = 0;  % Index for storing data in monitor_data
 
 while epoch < max_epochs && ~monitor.Stop
     epoch = epoch + 1;
+    % Print the epoch
+    fprintf('%d. ', epoch);
+
+    % Pruning step: apply pruning every epochs_pruned
+    if mod(epoch, epochs_pruned) == 0
+        net = prune_weights(net, pruning_th);
+    end
+
+    % Shuffle and prepare batches for this epoch
     index = randperm(num_iterations_per_epoch);
     x_train_batch = dlx(index);
     y_train_batch = dly(index);
@@ -224,6 +237,9 @@ recorded_monitor.rmse_train = rmse_train;                % Save RMSE for trainin
 recorded_monitor.rmse_train_smooth = rmse_train_smooth;  % Save smoothed training RMSE
 recorded_monitor.rmse_validation = rmse_validation;      % Save validation RMSE
 recorded_monitor.iterations_store = iterations_store;    % Save the iterations
+
+% Prune the network before saving
+net = prune_weights(net, pruning_th);
 
 net = min_val_net;
 info = min_info;

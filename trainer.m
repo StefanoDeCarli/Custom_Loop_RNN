@@ -25,9 +25,13 @@ train_options.is_lstm = false;
 train_options.hidden_units = [N]; % i.e. [Z;Z;Z] for 3 layers of Z hidden units each
 train_options.dropout_rate = 0.05;
 
+% Regularization design
+train_options.lasso_lambda = 1e-5;
+train_options.pruning_th = 5e-3;
+train_options.epochs_pruned = 10;
+
 % Training design
 train_options.learn_rate = 2e-2;
-train_options.lasso_lambda = 1e-4;
 train_options.max_epochs = 1000;
 train_options.mini_batch = numel(train_dataset.x);    % Take all the trials, to change in case
 train_options.is_visible = 'on';                      % on / off, show the training monitor or not

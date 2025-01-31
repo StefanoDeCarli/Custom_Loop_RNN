@@ -11,7 +11,7 @@ squared_diff = (Y - targets).^2;
 mse_loss = sum(squared_diff, 'all') / numel(Y);
 
 % Compute lasso loss regularization term
-lasso_loss = sum(cellfun(@(x) sum(abs(x), 'all'), net.Learnables.Value)) * lambda / numel(net.Learnables.Value);
+lasso_loss = lambda * sum(cellfun(@(w) sum(abs(w), 'all'), net.Learnables.Value)) / numel(net.Learnables.Value);
 
 loss = mse_loss + lasso_loss;
 
