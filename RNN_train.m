@@ -11,10 +11,14 @@ function [net,info,monitor,net_name] = RNN_train(train_dataset, valid_dataset, t
 %   - is_lstm       [logical]       Select LSTM (true) or GRU (false) architecture
 %   - hidden_units  [N x 1 double]  Number of hidden unit, implicit number of layers N
 %   - learn_rate    [double]        Learn rate, static
+%   - lasso_lambda  [double]        Weight for the Lasso regularization
+%   - pruning_th    [double]        Threshold to prune the weights below
+%   - epochs_pruned [double]        Interval between prunings
 %   - max_epochs    [double]        Maximum number of epochs to train with
 %   - mini_batch    [double]        Number of trials used in training for each iteration
 %   - dropout_rate  [double]        Dropout rate, part of the network to be dropped at each iteration
 %   - is_visible    [logical]       Whether the training monitor is shown or not
+%   - is_verbose    [logical]       Whether loss updates are shown or not in command window
 
 % The dataset structures must be like:
 
@@ -34,11 +38,15 @@ function [net,info,monitor,net_name] = RNN_train(train_dataset, valid_dataset, t
 
 is_lstm = train_options.is_lstm;
 hidden_units = train_options.hidden_units;
-dropout_rate = train_options.dropout_rate;
 learn_rate = train_options.learn_rate;
+lasso_lambda = train_options.lasso_lambda;
+pruning_th = train_options.pruning_th;
+epochs_pruned = train_options.epochs_pruned;
 max_epochs = train_options.max_epochs;
 mini_batch = train_options.mini_batch;
+dropout_rate = train_options.dropout_rate;
 is_visible = train_options.is_visible;
+is_verbose = train_options.is_verbose;
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %   SETTING PARAMETERS 
@@ -146,6 +154,17 @@ monitor_data_index = 0;  % Index for storing data in monitor_data
 
 while epoch < max_epochs && ~monitor.Stop
     epoch = epoch + 1;
+    % Print the epoch
+    if is_verbose
+    fprintf('%d. ', epoch);
+    end
+
+    % Pruning step: apply pruning every epochs_pruned
+    if mod(epoch, epochs_pruned) == 0
+        net = prune_weights(net, pruning_th);
+    end
+
+    % Shuffle and prepare batches for this epoch
     index = randperm(num_iterations_per_epoch);
     x_train_batch = dlx(index);
     y_train_batch = dly(index);
@@ -158,7 +177,7 @@ while epoch < max_epochs && ~monitor.Stop
         net = resetState(net);
 
         % Evaluate loss function
-        [loss, gradients, ~] = dlfeval(custom_loss, net, x_train_batch{batch}, y_train_batch{batch});
+        [loss, gradients, ~] = dlfeval(custom_loss, net, x_train_batch{batch}, y_train_batch{batch}, lasso_lambda, is_verbose);
         
         % Update network parameters based on loss
         [net, average_grad, average_sqgrad] = adamupdate(net, gradients, average_grad, average_sqgrad, iteration, learn_rate);
@@ -222,6 +241,9 @@ recorded_monitor.rmse_train = rmse_train;                % Save RMSE for trainin
 recorded_monitor.rmse_train_smooth = rmse_train_smooth;  % Save smoothed training RMSE
 recorded_monitor.rmse_validation = rmse_validation;      % Save validation RMSE
 recorded_monitor.iterations_store = iterations_store;    % Save the iterations
+
+% Prune the network before saving
+net = prune_weights(net, pruning_th);
 
 net = min_val_net;
 info = min_info;
