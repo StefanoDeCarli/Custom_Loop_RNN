@@ -177,19 +177,19 @@ while epoch < max_epochs && ~monitor.Stop
         net = resetState(net);
 
         % Evaluate loss function
-        [loss, gradients, ~] = dlfeval(custom_loss, net, x_train_batch{batch}, y_train_batch{batch}, lasso_lambda, is_verbose);
+        [losses, gradients, ~] = dlfeval(custom_loss, net, x_train_batch{batch}, y_train_batch{batch}, lasso_lambda, is_verbose);
         
         % Update network parameters based on loss
         [net, average_grad, average_sqgrad] = adamupdate(net, gradients, average_grad, average_sqgrad, iteration, learn_rate);
 
-        current_rmse_train = double(sqrt(loss));
+        current_rmse_train = double(sqrt(losses.mse_loss));
         rmse_train(monitor_data_index) = current_rmse_train;
 
-        loss_data(iteration) = loss;
+        loss_data(iteration) = losses.mse_loss;
 
         if rem(iteration, window_RMSE) == 0 || iteration == 1
             if iteration == 1
-                smooth_rmse = double(sqrt(loss));
+                smooth_rmse = double(sqrt(losses.mse_loss));
                 recordMetrics(monitor, iteration, TrainingRMSE_smooth=smooth_rmse);
             else
                 for window_index = 0:(window_RMSE-1)
@@ -215,7 +215,7 @@ while epoch < max_epochs && ~monitor.Stop
                 min_val_net = net;
 
                 % Save the relevant information for min_val_net
-                min_info.training_rmse = double(extractdata(sqrt(loss)));
+                min_info.training_rmse = double(extractdata(sqrt(losses.mse_loss)));
                 min_info.validation_rmse = validation_rmse;
 
                 min_monitor_data.rmse_train = rmse_train(1:monitor_data_index);

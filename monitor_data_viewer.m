@@ -4,7 +4,7 @@ clear;
 close all;
 
 % Load the monitor data (add name to the directory)
-load("net_results\gru_1L_96_0.010.mat");
+load("net_results\gru_1L_96_0.020.mat");
 
 % Set characteristics for plotting
 line_width = 2;   
