@@ -1,6 +1,12 @@
 % Custom loss function for RNN networks
 function [losses, gradients, state] = standard_clf(net, x, targets, lambda, is_verbose)
 
+% Move network and data to GPU if available
+if canUseGPU()
+    x = gpuArray(x);
+    targets = gpuArray(targets);
+end
+
 % Forward pass through the network
 [Y, state] = forward(net, x);
 

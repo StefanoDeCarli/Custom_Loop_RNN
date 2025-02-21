@@ -119,6 +119,7 @@ average_sqgrad = [];
 executionEnvironment = "auto";
 if (executionEnvironment == "auto" && canUseGPU) || executionEnvironment == "gpu"
     updateInfo(monitor, ExecutionEnvironment="GPU");
+    net = dlupdate(@gpuArray, net);
 else
     updateInfo(monitor, ExecutionEnvironment="CPU");
 end
